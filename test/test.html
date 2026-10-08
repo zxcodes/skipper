@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head><title>Skipper test</title></head>
+<body>
+  <div id="result">nothing clicked</div>
+  <button id="nav-trap" style="position:absolute;left:-9999px">Skip to main content</button>
+
+  <script>
+    window.__clicks = [];
+
+    function record(name) {
+      window.__clicks.push(name);
+      document.getElementById('result').textContent =
+        'clicked: ' + window.__clicks.join(', ');
+    }
+
+    // 1) Crunchyroll-style skip intro button, inserted after 600ms.
+    setTimeout(() => {
+      const b = document.createElement('button');
+      b.setAttribute('data-testid', 'skip-intro-button');
+      b.textContent = 'Skip Intro';
+      b.style.cssText = 'position:fixed;bottom:80px;right:40px;padding:12px 20px;opacity:0.01';
+      b.addEventListener('click', () => { record('intro'); b.remove(); });
+      document.body.appendChild(b);
+    }, 600);
+
+    // 2) skipIntroText-div variant (like the other userscript observed).
+    setTimeout(() => {
+      const btn = document.createElement('button');
+      const inner = document.createElement('div');
+      inner.setAttribute('data-testid', 'skipIntroText');
+      inner.textContent = 'SKIP CREDITS';
+      btn.appendChild(inner);
+      btn.style.cssText = 'position:fixed;bottom:80px;right:40px;padding:12px 20px';
+      btn.addEventListener('click', () => { record('credits'); btn.remove(); });
+      document.body.appendChild(btn);
+    }, 1400);
+
+    // 3) aria-label-only skip button (fallback path).
+    setTimeout(() => {
+      const b = document.createElement('button');
+      b.setAttribute('aria-label', 'Skip Recap');
+      b.textContent = '>>';
+      b.style.cssText = 'position:fixed;bottom:80px;right:40px;padding:12px 20px';
+      b.addEventListener('click', () => { record('recap'); b.remove(); });
+      document.body.appendChild(b);
+    }, 2200);
+  </script>
+
+  <!-- Load the extension content script directly — identical to content-script injection. -->
+  <script src="../content.js"></script>
+</body>
+</html>
